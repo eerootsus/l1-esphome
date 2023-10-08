@@ -1,0 +1,68 @@
+esphome:
+  friendly_name: RGB L1
+
+# Configure API, OTA, Wi-Fi and captive portal as needed
+api:
+ota:
+wifi:
+captive_portal:
+
+external_components:
+  - source:
+      type: git
+      url: https://github.com/eerootsus/l1-esphome
+      ref: main
+    components: [ sonoff_l1 ]
+
+esp8266:
+  board: esp8285
+  restore_from_flash: true
+
+# UART logging needs to be disabled to be able to listen to the serial port, API logger is still available
+logger:
+  baud_rate: 0
+
+light:
+  - platform: custom
+    lambda: |-
+      auto light_out = new SonoffL1();
+      App.register_component(light_out);
+      return {light_out};
+    lights:
+      - name: "LED Strip"
+        effects:
+          - lambda:
+              name: Colorful Gradient (Smooth)
+              lambda: |-
+                auto light_out = new SonoffL1();
+                light_out->setModeGradient();
+          - lambda:
+              name: Colorful Breath (Fade)
+              lambda: |-
+                auto light_out = new SonoffL1();
+                light_out->setModeBreath();
+          - lambda:
+              name: RGB Gradient
+              lambda: |-
+                auto light_out = new SonoffL1();
+                light_out->setModeRGBGradient();
+          - lambda:
+              name: RGB Pulse (Strobe)
+              lambda: |-
+                auto light_out = new SonoffL1();
+                light_out->setModeRGBPulse();
+          - lambda:
+              name: RGB Breath
+              lambda: |-
+                auto light_out = new SonoffL1();
+                light_out->setModeRGBBreath();
+          - lambda:
+              name: RGB Strobe (Flash)
+              lambda: |-
+                auto light_out = new SonoffL1();
+                light_out->setModeRGBStrobe();
+          - lambda:
+              name: Sound Reactive
+              lambda: |-
+                auto light_out = new SonoffL1();
+                light_out->setModeSync();
