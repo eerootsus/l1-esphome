@@ -10,7 +10,7 @@
 
 namespace esphome {
 namespace sonoff_l1 {
-class SonoffL1 : public light::LightOutput, public uart::UARTDevice, public Component {
+class SonoffL1Output : public light::LightOutput, public uart::UARTDevice, public Component {
 
   #define SONOFF_L1_MODE_COLORFUL           1  // [Color key] Colorful (static color)
   #define SONOFF_L1_MODE_COLORFUL_GRADIENT  2  // [SMOOTH] Colorful Gradient
