@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import uart, light, output
-from esphome.const import CONF_BLUE, CONF_GREEN, CONF_RED, CONF_OUTPUT_ID
+from esphome.components import uart, light
+from esphome.const import CONF_OUTPUT_ID
 
 DEPENDENCIES = ["uart", "light"]
 
@@ -14,9 +14,6 @@ CONFIG_SCHEMA = (
     light.RGB_LIGHT_SCHEMA.extend(
         {
             cv.GenerateID(CONF_OUTPUT_ID): cv.declare_id(SonoffL1Output),
-            cv.Required(CONF_RED): cv.use_id(output.FloatOutput),
-            cv.Required(CONF_GREEN): cv.use_id(output.FloatOutput),
-            cv.Required(CONF_BLUE): cv.use_id(output.FloatOutput),
         }
     )
     .extend(cv.COMPONENT_SCHEMA)
@@ -32,10 +29,3 @@ async def to_code(config):
     await cg.register_component(var, config)
     await light.register_light(var, config)
     await uart.register_uart_device(var, config)
-
-    red = await cg.get_variable(config[CONF_RED])
-    cg.add(var.set_red(red))
-    green = await cg.get_variable(config[CONF_GREEN])
-    cg.add(var.set_green(green))
-    blue = await cg.get_variable(config[CONF_BLUE])
-    cg.add(var.set_blue(blue))
