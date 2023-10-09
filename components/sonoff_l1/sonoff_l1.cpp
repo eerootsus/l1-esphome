@@ -155,7 +155,7 @@ bool SonoffL1Output::control_strip_(const bool binary, const uint8_t brightness)
                      0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00};
 
   cmd[6] = binary;
-  cmd[7] = remap<uint8_t, uint8_t>(brightness, 0, 100, this->min_value_, this->max_value_);
+  cmd[7] = brightness;
   ESP_LOGI(TAG, "[%04d] Setting strip state to %s, raw brightness=%d", this->write_count_, ONOFF(binary), cmd[7]);
   return this->write_command_(cmd, sizeof(cmd));
 }
@@ -166,7 +166,7 @@ void SonoffL1Output::process_command_(const uint8_t *cmd, const size_t len) {
     // Ack a command from RF to ESP to prevent repeating commands
     this->write_command_(ack_buffer, sizeof(ack_buffer), false);
     ESP_LOGI(TAG, "[%04d] RF sets strip state to %s, raw brightness=%d", this->write_count_, ONOFF(cmd[6]), cmd[7]);
-    const uint8_t new_brightness = remap<uint8_t, uint8_t>(cmd[7], this->min_value_, this->max_value_, 0, 100);
+    const uint8_t new_brightness = cmd[7];
     const bool new_state = cmd[6];
 
     // Got light change state command. In all cases we revert the command immediately
@@ -175,13 +175,7 @@ void SonoffL1Output::process_command_(const uint8_t *cmd, const size_t len) {
       this->control_strip_(this->last_binary_, this->last_brightness_);
     }
 
-    if (!this->use_rm433_remote_) {
-      // If RF remote is not used, this is a known ghost RF command
-      ESP_LOGI(TAG, "[%04d] Ghost command from RF detected, reverted", this->write_count_);
-    } else {
-      // If remote is used, initiate transition to the new state
-      this->publish_state_(new_state, new_brightness);
-    }
+    this->publish_state_(new_state, new_brightness);
   } else {
     ESP_LOGW(TAG, "[%04d] Unexpected command received", this->write_count_);
   }
