@@ -7,7 +7,7 @@ DEPENDENCIES = ["uart", "light"]
 
 sonoff_l1_ns = cg.esphome_ns.namespace("sonoff_l1")
 SonoffL1Output = sonoff_l1_ns.class_(
-    "SonoffL1", cg.Component, uart.UARTDevice, light.LightOutput
+    "SonoffL1Output", cg.Component, uart.UARTDevice, light.LightOutput
 )
 
 CONFIG_SCHEMA = (
