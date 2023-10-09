@@ -202,15 +202,10 @@ void SonoffL1Output::dump_config() {
 }
 
 void SonoffL1Output::loop() {
-  // Read commands from the strip
-  if (this->available()) {
-    ESP_LOGV(TAG, "Have some UART data in loop()");
-    uint8_t buffer[17] = {0};
-    size_t len = sizeof(buffer);
-    if (this->read_command_(buffer, len)) {
-      this->process_command_(buffer, len);
-    }
-  }
+  while (this->available()) {
+      uint8_t value = this->read();
+      ESP_LOGV(TAG, "0x%02x from the strip", value);
+   }
 }
 
 }  // namespace sonoff_l1
