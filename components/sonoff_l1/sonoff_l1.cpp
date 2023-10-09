@@ -35,50 +35,12 @@ void SonoffL1Output::skip_command_() {
 
 // This assumes some data is already available
 bool SonoffL1Output::read_command_(uint8_t *cmd, size_t &len) {
-  // Do consistency check
-  if (cmd == nullptr || len < 7) {
-    ESP_LOGW(TAG, "[%04d] Too short command buffer (actual len is %d bytes, minimal is 7)", this->write_count_, len);
-    return false;
-  }
-
   // Read a minimal packet
   if (this->read_array(cmd, 6)) {
     ESP_LOGV(TAG, "[%04d] Reading from strip:", this->write_count_);
     ESP_LOGV(TAG, "[%04d] %s", this->write_count_, format_hex_pretty(cmd, 6).c_str());
-
-    if (cmd[0] != 0xAA || cmd[1] != 0x55) {
-      ESP_LOGW(TAG, "[%04d] RX: wrong header (%x%x, must be AA55)", this->write_count_, cmd[0], cmd[1]);
-      this->skip_command_();
-      return false;
-    }
-    if ((cmd[5] + 7 /*mandatory header + crc suffix length*/) > len) {
-      ESP_LOGW(TAG, "[%04d] RX: Payload length is unexpected (%d, max expected %d)", this->write_count_, cmd[5],
-               len - 7);
-      this->skip_command_();
-      return false;
-    }
-    if (this->read_array(&cmd[6], cmd[5] + 1 /*checksum suffix*/)) {
-      ESP_LOGV(TAG, "[%04d] %s", this->write_count_, format_hex_pretty(&cmd[6], cmd[5] + 1).c_str());
-
-      // Check the checksum
-      uint8_t valid_checksum = this->calc_checksum_(cmd, cmd[5] + 7);
-      if (valid_checksum != cmd[cmd[5] + 7 - 1]) {
-        ESP_LOGW(TAG, "[%04d] RX: checksum mismatch (%d, expected %d)", this->write_count_, cmd[cmd[5] + 7 - 1],
-                 valid_checksum);
-        this->skip_command_();
-        return false;
-      }
-      len = cmd[5] + 7 /*mandatory header + suffix length*/;
-
-      // Read remaining gardbled data (just in case, I don't see where this can appear now)
-      this->skip_command_();
-      return true;
-    }
-  } else {
-    ESP_LOGW(TAG, "[%04d] RX: feedback timeout", this->write_count_);
-    this->skip_command_();
   }
-  return false;
+  return true;
 }
 
 bool SonoffL1Output::read_ack_(const uint8_t *cmd, const size_t len) {
@@ -157,14 +119,15 @@ bool SonoffL1Output::control_strip_(const bool binary, const uint8_t brightness)
   cmd[6] = binary;
   cmd[7] = brightness;
   ESP_LOGI(TAG, "[%04d] Setting strip state to %s, raw brightness=%d", this->write_count_, ONOFF(binary), cmd[7]);
-  return this->write_command_(cmd, sizeof(cmd));
+  //return this->write_command_(cmd, sizeof(cmd));
+  return true;
 }
 
 void SonoffL1Output::process_command_(const uint8_t *cmd, const size_t len) {
   if (cmd[2] == 0x01 && cmd[3] == 0x04 && cmd[4] == 0x00 && cmd[5] == 0x0A) {
     uint8_t ack_buffer[7] = {0xAA, 0x55, cmd[2], cmd[3], 0x00, 0x00, 0x00};
     // Ack a command from RF to ESP to prevent repeating commands
-    this->write_command_(ack_buffer, sizeof(ack_buffer), false);
+    //this->write_command_(ack_buffer, sizeof(ack_buffer), false);
     ESP_LOGI(TAG, "[%04d] RF sets strip state to %s, raw brightness=%d", this->write_count_, ONOFF(cmd[6]), cmd[7]);
     const uint8_t new_brightness = cmd[7];
     const bool new_state = cmd[6];
@@ -228,7 +191,6 @@ void SonoffL1Output::write_state(light::LightState *state) {
       this->last_binary_ = binary;
     } else {
       // Return to original value if failed to write to the strip
-      // TODO: Test me, can be tested if high-voltage part is not connected
       ESP_LOGW(TAG, "Failed to update the strip, publishing the previous state");
       this->publish_state_(this->last_binary_, this->last_brightness_);
     }
@@ -241,7 +203,6 @@ void SonoffL1Output::dump_config() {
 
 void SonoffL1Output::loop() {
   // Read commands from the strip
-  // RF chip notifies ESP about remotely changed state with the same commands as we send
   if (this->available()) {
     ESP_LOGV(TAG, "Have some UART data in loop()");
     uint8_t buffer[17] = {0};
