@@ -42,7 +42,8 @@ void SonoffL1Output::loop() {
     pos++;
   }
 
-  ESP_LOGV(TAG, "%s", format_hex_pretty(buffer, len).c_str());
+  //ESP_LOGV(TAG, "%s", format_hex_pretty(buffer, len).c_str());
+  ESP_LOGV(TAG, "0x%02x from the strip", buffer[0]);
 }
 
 }  // namespace sonoff_l1
