@@ -38,12 +38,14 @@ void SonoffL1Output::loop() {
   int count = static_cast<int>(len);
   int pos = 0;
   while (this->available() && count--) {
-    buffer[pos] = this->read();
-    pos++;
+    //buffer[pos] = this->read();
+    //pos++;
+    uint8_t value = this->read();
+    ESP_LOGV(TAG, "0x%02x from the strip", value);
   }
 
   //ESP_LOGV(TAG, "%s", format_hex_pretty(buffer, len).c_str());
-  ESP_LOGV(TAG, "0x%02x from the strip", buffer[0]);
+  //ESP_LOGV(TAG, "0x%02x from the strip", buffer[0]);
 }
 
 }  // namespace sonoff_l1
