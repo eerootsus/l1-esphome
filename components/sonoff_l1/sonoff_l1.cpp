@@ -11,7 +11,7 @@ light::LightTraits SonoffL1Output::get_traits() {
   return traits;
 }
 
-void SonoffD1Output::write_state(light::LightState *state) {
+void SonoffL1Output::write_state(light::LightState *state) {
   bool binary;
   float brightness;
 
