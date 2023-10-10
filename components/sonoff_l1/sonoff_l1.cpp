@@ -40,7 +40,9 @@ void SonoffL1Output::loop() {
     this->read_byte(&buffer[0]);
   }
 
-  ESP_LOGV(TAG, "Got from strip: %s", format_hex_pretty(buffer, len).c_str());
+  if (buffer[0] != 0x00) {
+      ESP_LOGV(TAG, "Got from strip: %s", format_hex_pretty(buffer, len).c_str());
+    }
 }
 
 }  // namespace sonoff_l1
