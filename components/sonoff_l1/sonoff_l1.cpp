@@ -33,11 +33,11 @@ void SonoffL1Output::dump_config() {
 }
 
 void SonoffL1Output::loop() {
-  uint8_t buffer[32] = {0};
-  size_t len = sizeof(buffer);
-  if (this->available() >= len) {
-    this->read_array(buffer, len);
-    ESP_LOGV(TAG, "Got from strip: %s", format_hex_pretty(buffer, len).c_str());
+  uint8_t data;
+  int count = 50;
+  while (this->available() && count--) {
+    this->read_byte(&data);
+    ESP_LOGV(TAG, "%s", format_hex_pretty(data).c_str());
   }
 }
 
