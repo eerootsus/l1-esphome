@@ -33,12 +33,16 @@ void SonoffL1Output::dump_config() {
 }
 
 void SonoffL1Output::loop() {
-  uint8_t data;
-  int count = 50;
+  uint8_t buffer[32] = {0};
+  size_t len = sizeof(buffer);
+  int count = static_cast<int>(len);
+  int pos = 0;
   while (this->available() && count--) {
-    this->read_byte(&data);
-    ESP_LOGV(TAG, "%s", format_hex_pretty(data).c_str());
+    buffer[pos] = this->read();
+    pos++;
   }
+
+  ESP_LOGV(TAG, "%s", format_hex_pretty(buffer).c_str());
 }
 
 }  // namespace sonoff_l1
