@@ -46,12 +46,6 @@ class SonoffL1Output : public light::LightOutput, public uart::UARTDevice, publi
   int write_count_{0};
   int read_count_{0};
   light::LightState *light_state_{nullptr};
-
-  bool read_command_(uint8_t *cmd, size_t &len);
-  bool write_command_(uint8_t *cmd, size_t len);
-  bool control_strip_(bool binary, uint8_t brightness);
-  void process_command_(const uint8_t *cmd, size_t len);
-  void publish_state_(bool is_on, uint8_t brightness);
 };
 
 }  // namespace sonoff_l1
