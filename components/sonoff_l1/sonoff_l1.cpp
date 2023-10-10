@@ -11,6 +11,23 @@ light::LightTraits SonoffL1Output::get_traits() {
   return traits;
 }
 
+void SonoffD1Output::write_state(light::LightState *state) {
+  bool binary;
+  float brightness;
+
+  // Fill our variables with the device's current state
+  state->current_values_as_binary(&binary);
+  state->current_values_as_brightness(&brightness);
+
+  // Convert ESPHome's brightness (0-1) to the device's internal brightness (0-100)
+  const uint8_t calculated_brightness = (uint8_t) roundf(brightness * 100);
+
+  if (calculated_brightness == 0) {
+    // if(binary) ESP_LOGD(TAG, "current_values_as_binary() returns true for zero brightness");
+    binary = false;
+  }
+}
+
 void SonoffL1Output::dump_config() {
   ESP_LOGCONFIG(TAG, "Sonoff L1 LED strip: '%s'", this->light_state_ ? this->light_state_->get_name().c_str() : "");
 }
