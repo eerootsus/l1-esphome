@@ -33,12 +33,11 @@ void SonoffL1Output::dump_config() {
 }
 
 void SonoffL1Output::loop() {
-  uint8_t buffer[32] = {0};
+  uint8_t buffer[1] = {0};
   size_t len = sizeof(buffer);
   int count = static_cast<int>(len);
-  ESP_LOGV(TAG, "Trying to read %04d bytes from UART", count);
   while (this->available() && count--) {
-    this->read_byte(&buffer[len - count - 1]);
+    this->read_byte(&buffer[0]);
   }
 
   ESP_LOGV(TAG, "Got from strip: %s", format_hex_pretty(buffer, len).c_str());
