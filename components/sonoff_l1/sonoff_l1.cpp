@@ -29,7 +29,7 @@ void SonoffL1Output::write_state(light::LightState *state) {
 }
 
 void SonoffL1Output::dump_config() {
-  ESP_LOGCONFIG(TAG, "Sonoff L1 LED strip: '%s'", this->light_state_ ? this->light_state_->get_name().c_str() : "");
+  ESP_LOGCONFIG(TAG, "Light name: '%s'", this->light_state_ ? this->light_state_->get_name().c_str() : "");
 }
 
 void SonoffL1Output::loop() {
