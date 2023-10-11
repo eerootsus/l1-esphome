@@ -36,7 +36,7 @@ void SonoffL1Output::loop() {
   int count = 32;
   while (this->available() && count--) {
     uint8_t byte = this->read();
-    this->bytes_.push_back(byte);
+    this->bytes_.push_back(0x55);
   }
 
   this->log_string();
