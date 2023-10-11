@@ -43,8 +43,10 @@ void SonoffL1Output::loop() {
 }
 
 void SonoffL1Output::log_string() {
-  std::string res;
   size_t len = this->bytes_.size();
+  if(len == 0) return;
+
+  std::string res;
   char buf[5];
   for (size_t i = 0; i < len; i++) {
     if (this->bytes_[i] == 7) {
@@ -76,7 +78,7 @@ void SonoffL1Output::log_string() {
       res += this->bytes_[i];
     }
   }
-  res += '"';
+
   this->bytes_.clear();
   ESP_LOGV(TAG, "%s", res.c_str());
   delay(10);
