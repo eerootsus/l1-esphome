@@ -33,16 +33,15 @@ void SonoffL1Output::dump_config() {
 }
 
 void SonoffL1Output::loop() {
-  uint8_t byte = 0;
-  int count = 32;
+  int count = 64;
   while (this->available() && count--) {
-    byte = this->read();
-    this->bytes_.push_back(byte);
-  }
-
-  if (byte == 27){
-    this->log_string(this->bytes_);
-    this->bytes_.clear();
+    uint8_t byte = this->read();
+    if (byte == 27){
+      this->log_string(this->bytes_);
+      this->bytes_.clear();
+    } else {
+      this->bytes_.push_back(byte);
+    }
   }
 }
 
