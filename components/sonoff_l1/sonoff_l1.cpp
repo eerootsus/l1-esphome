@@ -29,23 +29,57 @@ void SonoffL1Output::write_state(light::LightState *state) {
 }
 
 void SonoffL1Output::dump_config() {
-  ESP_LOGCONFIG(TAG, "Light name: '%s'", this->light_state_ ? this->light_state_->get_name().c_str() : "");
+  ESP_LOGCONFIG(TAG, "L1 instance name: '%s'", this->light_state_ ? this->light_state_->get_name().c_str() : "");
 }
 
 void SonoffL1Output::loop() {
-  uint8_t buffer[32] = {0};
-  size_t len = sizeof(buffer);
-  int count = static_cast<int>(len);
-  int pos = 0;
+  int count = 32;
   while (this->available() && count--) {
-    //buffer[pos] = this->read();
-    //pos++;
-    uint8_t value = this->read();
-    ESP_LOGV(TAG, "0x%02x from the strip", value);
+    uint8_t byte = this->read();
+    this->bytes_.push_back(byte);
   }
 
-  //ESP_LOGV(TAG, "%s", format_hex_pretty(buffer, len).c_str());
-  //ESP_LOGV(TAG, "0x%02x from the strip", buffer[0]);
+  this->log_string();
+}
+
+void SonoffL1Output::log_string() {
+  std::string res;
+  size_t len = this->bytes_.size();
+  char buf[5];
+  for (size_t i = 0; i < len; i++) {
+    if (this->bytes_[i] == 7) {
+      res += "\\a";
+    } else if (this->bytes_[i] == 8) {
+      res += "\\b";
+    } else if (this->bytes_[i] == 9) {
+      res += "\\t";
+    } else if (this->bytes_[i] == 10) {
+      res += "\\n";
+    } else if (this->bytes_[i] == 11) {
+      res += "\\v";
+    } else if (this->bytes_[i] == 12) {
+      res += "\\f";
+    } else if (this->bytes_[i] == 13) {
+      res += "\\r";
+    } else if (this->bytes_[i] == 27) {
+      res += "\\e";
+    } else if (this->bytes_[i] == 34) {
+      res += "\\\"";
+    } else if (this->bytes_[i] == 39) {
+      res += "\\'";
+    } else if (this->bytes_[i] == 92) {
+      res += "\\\\";
+    } else if (this->bytes_[i] < 32 || this->bytes_[i] > 127) {
+      sprintf(buf, "\\x%02X", this->bytes_[i]);
+      res += buf;
+    } else {
+      res += this->bytes_[i];
+    }
+  }
+  res += '"';
+  this->bytes_.clear();
+  ESP_LOGV(TAG, "%s", res.c_str());
+  delay(10);
 }
 
 }  // namespace sonoff_l1
