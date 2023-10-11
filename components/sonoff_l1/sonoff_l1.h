@@ -13,7 +13,6 @@ namespace esphome {
 namespace sonoff_l1 {
 class SonoffL1Output : public light::LightOutput, public uart::UARTDevice, public Component {
  public:
-  SonoffL1Output(UARTComponent *parent) : UARTDevice(parent) {}
 
   // LightOutput methods
   light::LightTraits get_traits() override;
