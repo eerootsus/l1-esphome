@@ -5,6 +5,7 @@
 #include "esphome/core/helpers.h"
 #include "esphome/core/component.h"
 #include "esphome/components/uart/uart.h"
+#include "esphome/components/uart/uart_component.h"
 #include "esphome/components/light/light_output.h"
 #include "esphome/components/light/light_state.h"
 #include "esphome/components/light/light_traits.h"
@@ -13,6 +14,7 @@ namespace esphome {
 namespace sonoff_l1 {
 class SonoffL1Output : public light::LightOutput, public uart::UARTDevice, public Component {
  public:
+  SonoffL1Output(uart::UARTComponent *parent) : uart::UARTDevice(parent) {}
 
   // LightOutput methods
   light::LightTraits get_traits() override;
@@ -20,7 +22,7 @@ class SonoffL1Output : public light::LightOutput, public uart::UARTDevice, publi
   void write_state(light::LightState *state) override;
 
   // Component methods
-  void setup() override{};
+  void setup() override {};
   void loop() override;
   void dump_config() override;
   float get_setup_priority() const override { return esphome::setup_priority::BUS; }

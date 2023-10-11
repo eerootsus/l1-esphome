@@ -33,9 +33,8 @@ void SonoffL1Output::dump_config() {
 }
 
 void SonoffL1Output::loop() {
-  ESP_LOGV(TAG, "Bytes available: %d", this->available());
-
-  while (this->available()) {
+  int count = 32;
+  while (this->available() && count--) {
     uint8_t byte = this->read();
     this->bytes_.push_back(byte);
   }
