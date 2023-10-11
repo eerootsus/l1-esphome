@@ -41,7 +41,7 @@ void SonoffL1Output::loop() {
   }
 
   if (byte == 27){
-    this->log_string();
+    this->log_string(this->bytes_);
     this->bytes_.clear();
   }
 }
