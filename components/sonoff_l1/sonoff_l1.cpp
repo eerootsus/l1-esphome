@@ -33,53 +33,56 @@ void SonoffL1Output::dump_config() {
 }
 
 void SonoffL1Output::loop() {
+  uint8_t byte = 0;
   int count = 32;
   while (this->available() && count--) {
-    uint8_t byte = this->read();
+    byte = this->read();
     this->bytes_.push_back(byte);
   }
 
-  this->log_string();
+  if (byte == 27){
+    this->log_string();
+    this->bytes_.clear();
+  }
 }
 
-void SonoffL1Output::log_string() {
-  size_t len = this->bytes_.size();
+void SonoffL1Output::log_string(std::vector<uint8_t> bytes) {
+  size_t len = bytes.size();
   if(len == 0) return;
 
   std::string res;
   char buf[5];
   for (size_t i = 0; i < len; i++) {
-    if (this->bytes_[i] == 7) {
+    if (bytes[i] == 7) {
       res += "\\a";
-    } else if (this->bytes_[i] == 8) {
+    } else if (bytes[i] == 8) {
       res += "\\b";
-    } else if (this->bytes_[i] == 9) {
+    } else if (bytes[i] == 9) {
       res += "\\t";
-    } else if (this->bytes_[i] == 10) {
+    } else if (bytes[i] == 10) {
       res += "\\n";
-    } else if (this->bytes_[i] == 11) {
+    } else if (bytes[i] == 11) {
       res += "\\v";
-    } else if (this->bytes_[i] == 12) {
+    } else if (bytes[i] == 12) {
       res += "\\f";
-    } else if (this->bytes_[i] == 13) {
+    } else if (bytes[i] == 13) {
       res += "\\r";
-    } else if (this->bytes_[i] == 27) {
+    } else if (bytes[i] == 27) {
       res += "\\e";
-    } else if (this->bytes_[i] == 34) {
-      res += "\\\"";
-    } else if (this->bytes_[i] == 39) {
-      res += "\\'";
-    } else if (this->bytes_[i] == 92) {
-      res += "\\\\";
-    } else if (this->bytes_[i] < 32 || this->bytes_[i] > 127) {
-      sprintf(buf, "\\x%02X", this->bytes_[i]);
+    } else if (bytes[i] == 34) {
+      res += "\"";
+    } else if (bytes[i] == 39) {
+      res += "'";
+    } else if (bytes[i] == 92) {
+      res += "\\";
+    } else if (bytes[i] < 32 || bytes[i] > 127) {
+      sprintf(buf, "\\x%02X", bytes[i]);
       res += buf;
     } else {
-      res += this->bytes_[i];
+      res += bytes[i];
     }
   }
 
-  this->bytes_.clear();
   ESP_LOGV(TAG, "%s", res.c_str());
   delay(10);
 }

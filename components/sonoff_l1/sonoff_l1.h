@@ -28,7 +28,7 @@ class SonoffL1Output : public light::LightOutput, public uart::UARTDevice, publi
   std::vector<uint8_t> bytes_{};
   light::LightState *light_state_{nullptr};
 
-  void log_string();
+  void log_string(std::vector<uint8_t> bytes);
 };
 
 }  // namespace sonoff_l1
