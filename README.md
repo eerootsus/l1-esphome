@@ -4,6 +4,7 @@ Sonoff L1 RGB UART Component for ESPHome
 ## Acknowledgements
 This is based on the amazing work by:
 - [Emory Dunn](https://emorydunn.com/blog/2020/08/10/sonoff-l1-&-home-assistant/) and his [custom light component](https://gist.github.com/emorydunn/db410db8bf68c8a335f3362d69624aaa)
+- [Theo Arends](https://github.com/arendst) and his amazing [Tasmota project](https://tasmota.github.io/docs/), which includes [Sonoff L1 support](https://github.com/arendst/Tasmota/blob/development/tasmota/tasmota_xlgt_light/xlgt_05_sonoff_l1.ino)
 - [Anatoly Savchenkov](https://github.com/anatoly-savchenkov) and his [Sonoff D1 component](https://esphome.io/components/light/sonoff_d1)
 - [ESPHome](https://esphome.io/) and their [UARTDebugger component](https://esphome.io/components/uart#debugging)
 

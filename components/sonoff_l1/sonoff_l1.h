@@ -22,7 +22,7 @@ class SonoffL1Output : public light::LightOutput, public uart::UARTDevice, publi
   void setup() override {};
   void loop() override;
   void dump_config() override;
-  float get_setup_priority() const override { return esphome::setup_priority::LATE; }
+  float get_setup_priority() const override { return esphome::setup_priority::BUS; }
 
  protected:
   std::vector<uint8_t> bytes_{};
