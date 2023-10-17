@@ -27,20 +27,23 @@ void SonoffL1Output::write_state(light::LightState *state) {
     binary = false;
   }
 
-  ESP_LOGV(TAG, "Setting light state: %s, brightness %d", binary ? "on" : "off", calculated_brightness);
+  ESP_LOGD(TAG, "Setting light state: %s, brightness %d", binary ? "on" : "off", calculated_brightness);
 
   sprintf (
     buffer,
-    "AT+UPDATE=\"sequence\":\"%d%03d\",\"switch\":\"%s\",\"light_type\":1,\"colorR\":255,\"colorG\":0,\"colorB\":0,\"bright\":%d,\"mode\":1,\"speed\":50,\"sensitive\":10",
-    millis(),
-    millis()%1000,
+    "AT+UPDATE=\"sequence\":\"%d\",\"switch\":\"%s\",\"light_type\":1,\"colorR\":255,\"colorG\":0,\"colorB\":0,\"bright\":%d,\"mode\":1,\"speed\":50,\"sensitive\":10",
+    micros(),
     binary ? "on" : "off",
     calculated_brightness
   );
 
-  this->write_str(buffer);
+  this->send_at_message(buffer);
+}
+
+void SonoffL1Output::send_at_message(const char *str) {
+  ESP_LOGV(TAG, str);
+  this->write_str(str);
   this->write_byte(0x1B);
-  this->flush();
 }
 
 void SonoffL1Output::dump_config() {
