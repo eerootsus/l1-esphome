@@ -37,13 +37,15 @@ void SonoffL1Output::write_state(light::LightState *state) {
     calculated_brightness
   );
 
-  this->send_at_message(buffer);
+  this->send_at_command(buffer);
 }
 
-void SonoffL1Output::send_at_message(const char *str) {
-  ESP_LOGV(TAG, str);
+void SonoffL1Output::send_at_command(const char *str) {
+  ESP_LOGV(TAG, "Sending AT command: %s", str);
   this->write_str(str);
   this->write_byte(0x1B);
+  this->flush();
+  delay(10);
 }
 
 void SonoffL1Output::dump_config() {
