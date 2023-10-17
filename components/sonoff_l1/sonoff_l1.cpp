@@ -23,9 +23,10 @@ void SonoffL1Output::write_state(light::LightState *state) {
   const uint8_t calculated_brightness = (uint8_t) roundf(brightness * 100);
 
   if (calculated_brightness == 0) {
-    // if(binary) ESP_LOGD(TAG, "current_values_as_binary() returns true for zero brightness");
     binary = false;
   }
+
+  ESP_LOGD(TAG, "Setting light state: %s, brightness %d", binary ? "on" : "off", calculated_brightness);
 }
 
 void SonoffL1Output::dump_config() {
