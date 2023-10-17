@@ -12,6 +12,7 @@ light::LightTraits SonoffL1Output::get_traits() {
 }
 
 void SonoffL1Output::write_state(light::LightState *state) {
+  char buffer [192];
   bool binary;
   float brightness;
 
@@ -26,7 +27,20 @@ void SonoffL1Output::write_state(light::LightState *state) {
     binary = false;
   }
 
-  ESP_LOGD(TAG, "Setting light state: %s, brightness %d", binary ? "on" : "off", calculated_brightness);
+  ESP_LOGV(TAG, "Setting light state: %s, brightness %d", binary ? "on" : "off", calculated_brightness);
+
+  sprintf (
+    buffer,
+    "AT+UPDATE=\"sequence\":\"%d%03d\",\"switch\":\"%s\",\"light_type\":1,\"colorR\":255,\"colorG\":0,\"colorB\":0,\"bright\":%d,\"mode\":1,\"speed\":50,\"sensitive\":10",
+    millis(),
+    millis()%1000,
+    binary ? "on" : "off",
+    calculated_brightness
+  );
+
+  this->write_str(buffer);
+  this->write_byte(0x1B);
+  this->flush();
 }
 
 void SonoffL1Output::dump_config() {
