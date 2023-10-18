@@ -11,14 +11,32 @@ light::LightTraits SonoffL1Output::get_traits() {
   return traits;
 }
 
+void SonoffL1Output::setup_state(light::LightState *state) {
+  ESP_LOGD(TAG, "Setting light initial state");
+  this->next_light_state_ = state;
+}
+
+void SonoffL1Output::update_state(light::LightState *state) {
+  ESP_LOGD(TAG, "Updating light state");
+  this->next_light_state_ = state;
+}
+
 void SonoffL1Output::write_state(light::LightState *state) {
+  ESP_LOGD(TAG, "Writing light state");
+  this->next_light_state_ = state;
+}
+
+void SonoffL1Output::send_next_state() {
   char buffer [192];
   bool binary;
   float brightness;
 
   // Fill our variables with the device's current state
-  state->current_values_as_binary(&binary);
-  state->current_values_as_brightness(&brightness);
+  this->next_light_state_->current_values_as_binary(&binary);
+  this->next_light_state_->current_values_as_brightness(&brightness);
+
+  this->next_light_state_ = nullptr;
+  this->last_sequence_ = micros();
 
   // Convert ESPHome's brightness (0-1) to the device's internal brightness (0-100)
   const uint8_t calculated_brightness = (uint8_t) roundf(brightness * 100);
@@ -31,8 +49,8 @@ void SonoffL1Output::write_state(light::LightState *state) {
 
   sprintf (
     buffer,
-    "AT+UPDATE=\"sequence\":\"%d\",\"switch\":\"%s\",\"light_type\":1,\"colorR\":255,\"colorG\":0,\"colorB\":0,\"bright\":%d,\"mode\":1,\"speed\":50,\"sensitive\":10",
-    micros(),
+    "AT+UPDATE=\"sequence\":\"%d\",\"switch\":\"%s\",\"light_type\":1,\"colorR\":255,\"colorG\":255,\"colorB\":255,\"bright\":%d,\"mode\":1,\"speed\":50,\"sensitive\":10",
+    this->last_sequence_,
     binary ? "on" : "off",
     calculated_brightness
   );
@@ -53,7 +71,7 @@ void SonoffL1Output::dump_config() {
 }
 
 void SonoffL1Output::loop() {
-  int count = 64;
+  int count = 32;
   while (this->available() && count--) {
     uint8_t byte = this->read();
     if (byte == 27){
@@ -62,6 +80,10 @@ void SonoffL1Output::loop() {
     } else {
       this->bytes_.push_back(byte);
     }
+  }
+
+  if(this->next_light_state_ != nullptr) {
+    this->send_next_state();
   }
 }
 
