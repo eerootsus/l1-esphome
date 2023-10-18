@@ -49,7 +49,7 @@ void SonoffL1Output::send_next_state() {
 
   sprintf (
     buffer,
-    "AT+UPDATE=\"sequence\":\"%d\",\"switch\":\"%s\",\"light_type\":1,\"colorR\":255,\"colorG\":255,\"colorB\":255,\"bright\":%d,\"mode\":1,\"speed\":50,\"sensitive\":10",
+    "AT+UPDATE=\"sequence\":\"%lld\",\"switch\":\"%s\",\"light_type\":1,\"colorR\":255,\"colorG\":255,\"colorB\":255,\"bright\":%d,\"mode\":1,\"speed\":50,\"sensitive\":10",
     this->last_sequence_,
     binary ? "on" : "off",
     calculated_brightness
