@@ -33,7 +33,7 @@ class SonoffL1Output : public light::LightOutput, public uart::UARTDevice, publi
 
   void log_string(std::vector<uint8_t> bytes);
   void send_at_command(const char *str);
-  void state_to_at_command(light::LightState *state);
+  void send_next_state();
 };
 
 }  // namespace sonoff_l1
