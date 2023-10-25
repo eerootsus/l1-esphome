@@ -77,16 +77,6 @@ void SonoffL1Output::loop() {
 
       std::vector<std::string> parts = this->split(message, '=');
 
-      if (parts.size() != 2) {
-        ESP_LOGE(TAG, "Message from UART seems to be malformed: %s", message.c_str());
-      } else {
-        std::vector<std::string> sub_parts = this->split(message, ',');
-
-        if(parts[0] == "AT+RESULT"){
-            ESP_LOGV(TAG, "Received ACK from UART: %s", sub_parts[1].c_str());
-        }
-      }
-
     } else {
       this->bytes_.push_back(byte);
     }
