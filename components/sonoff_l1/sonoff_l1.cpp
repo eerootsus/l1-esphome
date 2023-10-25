@@ -71,9 +71,22 @@ void SonoffL1Output::loop() {
 
     // End of message, handle it and clear the buffer
     if (byte == 27){
-      std::string str = this->uart_bytes_to_string(this->bytes_);
-      ESP_LOGV(TAG, "Received from UART: %s", str.c_str());
+      std::string message = this->uart_bytes_to_string(this->bytes_);
       this->bytes_.clear();
+      ESP_LOGV(TAG, "Received from UART: %s", message.c_str());
+
+      std::vector<std::string> parts = this->split(message, '=');
+
+      if (parts.size() != 2) {
+        ESP_LOGE(TAG, "Message from UART seems to be malformed: %s", message.c_str());
+      } else {
+        std::vector<std::string> sub_parts = this->split(message, ',');
+
+        if(parts[0] == "AT+RESULT"){
+            ESP_LOGV(TAG, "Received ACK from UART: %s", sub_parts[1].c_str());
+        }
+      }
+
     } else {
       this->bytes_.push_back(byte);
     }
@@ -122,6 +135,18 @@ std::string SonoffL1Output::uart_bytes_to_string(std::vector<uint8_t> bytes) {
 
   return res;
 
+}
+
+std::vector<std::string> SonoffL1Output::split (const std::string &s, char delim) {
+    std::vector<std::string> result;
+    std::stringstream ss (s);
+    std::string item;
+
+    while (getline (ss, item, delim)) {
+        result.push_back (item);
+    }
+
+    return result;
 }
 
 }  // namespace sonoff_l1
