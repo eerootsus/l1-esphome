@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <sstream>
 #include "esphome/core/log.h"
 #include "esphome/core/helpers.h"
 #include "esphome/core/component.h"
@@ -32,7 +31,6 @@ class SonoffL1Output : public light::LightOutput, public uart::UARTDevice, publi
   uint64_t last_sequence_{0};
 
   std::string uart_bytes_to_string(std::vector<uint8_t> bytes);
-  std::vector<std::string> split (const std::string &s, char delim);
   void send_at_command(const char *str);
   void send_next_state();
 };

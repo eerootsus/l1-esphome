@@ -75,7 +75,8 @@ void SonoffL1Output::loop() {
       this->bytes_.clear();
       ESP_LOGV(TAG, "Received from UART: %s", message.c_str());
 
-      std::vector<std::string> parts = this->split(message, '=');
+      std::string header = message.substr(0, message.find("="));
+      ESP_LOGV(TAG, "Message header: %s", header.c_str());
 
     } else {
       this->bytes_.push_back(byte);
@@ -125,18 +126,6 @@ std::string SonoffL1Output::uart_bytes_to_string(std::vector<uint8_t> bytes) {
 
   return res;
 
-}
-
-std::vector<std::string> SonoffL1Output::split (const std::string &s, char delim) {
-    std::vector<std::string> result;
-    std::stringstream ss (s);
-    std::string item;
-
-    while (getline (ss, item, delim)) {
-        result.push_back (item);
-    }
-
-    return result;
 }
 
 }  // namespace sonoff_l1
