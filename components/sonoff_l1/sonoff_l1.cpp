@@ -16,11 +16,6 @@ void SonoffL1Output::setup_state(light::LightState *state) {
   this->next_light_state_ = state;
 }
 
-void SonoffL1Output::update_state(light::LightState *state) {
-  ESP_LOGD(TAG, "Updating light state");
-  this->next_light_state_ = state;
-}
-
 void SonoffL1Output::write_state(light::LightState *state) {
   ESP_LOGD(TAG, "Writing light state");
   this->next_light_state_ = state;
@@ -63,7 +58,6 @@ void SonoffL1Output::send_at_command(const char *str) {
   this->write_str(str);
   this->write_byte(0x1B);
   this->flush();
-  delay(10);
 }
 
 void SonoffL1Output::dump_config() {
@@ -74,8 +68,11 @@ void SonoffL1Output::loop() {
   int count = 32;
   while (this->available() && count--) {
     uint8_t byte = this->read();
+
+    // End of message, handle it and clear the buffer
     if (byte == 27){
-      this->log_string(this->bytes_);
+      std::string str = this->uart_bytes_to_string(this->bytes_);
+      ESP_LOGV(TAG, "Received from UART: %s", str.c_str());
       this->bytes_.clear();
     } else {
       this->bytes_.push_back(byte);
@@ -87,12 +84,11 @@ void SonoffL1Output::loop() {
   }
 }
 
-void SonoffL1Output::log_string(std::vector<uint8_t> bytes) {
-  size_t len = bytes.size();
-  if(len == 0) return;
-
+std::string SonoffL1Output::uart_bytes_to_string(std::vector<uint8_t> bytes) {
   std::string res;
+  size_t len = bytes.size();
   char buf[5];
+
   for (size_t i = 0; i < len; i++) {
     if (bytes[i] == 7) {
       res += "\\a";
@@ -124,8 +120,8 @@ void SonoffL1Output::log_string(std::vector<uint8_t> bytes) {
     }
   }
 
-  ESP_LOGV(TAG, "%s", res.c_str());
-  delay(10);
+  return res;
+
 }
 
 }  // namespace sonoff_l1

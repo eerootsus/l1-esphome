@@ -17,7 +17,6 @@ class SonoffL1Output : public light::LightOutput, public uart::UARTDevice, publi
   light::LightTraits get_traits() override;
   void setup_state(light::LightState *state) override;
   void write_state(light::LightState *state) override;
-  void update_state(light::LightState *state) override;
 
   // Component methods
   void setup() override {};
@@ -31,7 +30,7 @@ class SonoffL1Output : public light::LightOutput, public uart::UARTDevice, publi
   light::LightState *next_light_state_{nullptr};
   uint64_t last_sequence_{0};
 
-  void log_string(std::vector<uint8_t> bytes);
+  std::string uart_bytes_to_string(std::vector<uint8_t> bytes);
   void send_at_command(const char *str);
   void send_next_state();
 };
