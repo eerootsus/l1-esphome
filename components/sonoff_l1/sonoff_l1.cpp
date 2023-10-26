@@ -79,7 +79,7 @@ void SonoffL1Output::loop() {
       message.erase(0, message.find("=") + 1);
       ESP_LOGV(TAG, "Message header: %s", header.c_str());
 
-      if(message == "AT+RESULT"){
+      if(header == "AT+RESULT"){
         ESP_LOGV(TAG, "Received AT+RESULT, sending ACK");
         this->send_at_command("AT+SEND=ok");
       }
