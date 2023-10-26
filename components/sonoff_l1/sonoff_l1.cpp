@@ -76,7 +76,13 @@ void SonoffL1Output::loop() {
       ESP_LOGV(TAG, "Received from UART: %s", message.c_str());
 
       std::string header = message.substr(0, message.find("="));
+      message.erase(0, message.find("=") + 1);
       ESP_LOGV(TAG, "Message header: %s", header.c_str());
+
+      if(message == "AT+RESULT"){
+        ESP_LOGV(TAG, "Received AT+RESULT, sending ACK");
+        this->send_at_command("AT+SEND=ok");
+      }
 
     } else {
       this->bytes_.push_back(byte);
