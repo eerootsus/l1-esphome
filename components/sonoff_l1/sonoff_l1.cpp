@@ -89,11 +89,15 @@ void SonoffL1Output::loop() {
 
       if(header == "AT+UPDATE"){
         ESP_LOGV(TAG, "Received AT+UPDATE, parsing attributes");
-        message.push_back(',');
+        message.push_back(','); // Add a comma to the end of the message so we can parse the last attribute
         while(message.length()){
-            std::string attribute = message.substr(0, message.find(","));
+            std::string value = message.substr(0, message.find(","));
             message.erase(0, message.find(",") + 1);
-            ESP_LOGV(TAG, "Attribute %s", attribute.c_str());
+
+            std::string attribute = value.substr(0, message.find(":"));
+            value.erase(0, message.find(":") + 1);
+
+            ESP_LOGV(TAG, "Attribute %s has value ", attribute.c_str(), value.c_str());
         }
       }
 
