@@ -80,6 +80,7 @@ void SonoffL1Output::loop() {
       message.erase(0, message.find("=") + 1);
       bool state_has_changed = false;
       ESP_LOGV(TAG, "Message header: %s", header.c_str());
+      auto call = light_state_->make_call();
 
       if(header == "AT+RESULT"){
         ESP_LOGV(TAG, "Received AT+RESULT, sending ACK");
@@ -99,10 +100,10 @@ void SonoffL1Output::loop() {
 
           if(attribute == "\"switch\""){
             if (value == "\"on\"" && !this->light_state_->current_values.is_on()) {
-              this->light_state_->current_values.set_state(true);
+              call.set_state(true);
               state_has_changed = true;
             } else if (value == "\"off\"" && this->light_state_->current_values.is_on()) {
-              this->light_state_->current_values.set_state(false);
+              call.set_state(false);
               state_has_changed = true;
             }
           } else {
@@ -116,7 +117,6 @@ void SonoffL1Output::loop() {
 
       if (state_has_changed && this->light_state_) {
           ESP_LOGV(TAG, "Publishing light state to frontend");
-          auto call = light_state_->make_call();
           call.perform();
         }
 
