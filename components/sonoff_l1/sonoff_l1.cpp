@@ -97,6 +97,21 @@ void SonoffL1Output::loop() {
             std::string attribute = value.substr(0, value.find(":"));
             value.erase(0, message.find(":") + 1);
 
+            switch (attribute) {
+                case "\"switch\"":
+                    if (value == "\"on\"" && !this->light_state_->current_values.is_on()) {
+                        this->light_state_->current_values.set_state(true);
+                        state_has_changed = true;
+                    } else if (value == "\"off\"" && this->light_state_->current_values.is_on()) {
+                        this->light_state_->current_values.set_state(false);
+                        state_has_changed = true;
+                    }
+                    break;
+                default:
+                    continue;
+                    break;
+            }
+
             ESP_LOGV(TAG, "Attribute %s has value %s", attribute.c_str(), value.c_str());
         }
       }
