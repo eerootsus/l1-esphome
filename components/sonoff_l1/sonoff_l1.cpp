@@ -91,28 +91,25 @@ void SonoffL1Output::loop() {
         ESP_LOGV(TAG, "Received AT+UPDATE, parsing attributes");
         message.push_back(','); // Add a comma to the end of the message so we can parse the last attribute
         while(message.length()){
-            std::string value = message.substr(0, message.find(","));
-            message.erase(0, message.find(",") + 1);
+          std::string value = message.substr(0, message.find(","));
+          message.erase(0, message.find(",") + 1);
 
-            std::string attribute = value.substr(0, value.find(":"));
-            value.erase(0, message.find(":") + 1);
+          std::string attribute = value.substr(0, value.find(":"));
+          value.erase(0, message.find(":") + 1);
 
-            switch (attribute) {
-                case "\"switch\"":
-                    if (value == "\"on\"" && !this->light_state_->current_values.is_on()) {
-                        this->light_state_->current_values.set_state(true);
-                        state_has_changed = true;
-                    } else if (value == "\"off\"" && this->light_state_->current_values.is_on()) {
-                        this->light_state_->current_values.set_state(false);
-                        state_has_changed = true;
-                    }
-                    break;
-                default:
-                    continue;
-                    break;
+          if(attribute == "\"switch\""){
+            if (value == "\"on\"" && !this->light_state_->current_values.is_on()) {
+              this->light_state_->current_values.set_state(true);
+              state_has_changed = true;
+            } else if (value == "\"off\"" && this->light_state_->current_values.is_on()) {
+              this->light_state_->current_values.set_state(false);
+              state_has_changed = true;
             }
+          } else {
+            continue;
+          }
 
-            ESP_LOGV(TAG, "Attribute %s has value %s", attribute.c_str(), value.c_str());
+          ESP_LOGV(TAG, "Attribute %s has value %s", attribute.c_str(), value.c_str());
         }
       }
 
