@@ -95,7 +95,7 @@ void SonoffL1Output::loop() {
           message.erase(0, message.find(",") + 1);
 
           std::string attribute = value.substr(0, value.find(":"));
-          value.erase(0, message.find(":") + 1);
+          value.erase(0, value.find(":") + 1);
 
           if(attribute == "\"switch\""){
             if (value == "\"on\"" && !this->light_state_->current_values.is_on()) {
