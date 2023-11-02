@@ -94,7 +94,7 @@ void SonoffL1Output::loop() {
             std::string value = message.substr(0, message.find(","));
             message.erase(0, message.find(",") + 1);
 
-            std::string attribute = value.substr(0, message.find(":"));
+            std::string attribute = value.substr(0, value.find(":"));
             value.erase(0, message.find(":") + 1);
 
             ESP_LOGV(TAG, "Attribute %s has value %s", attribute.c_str(), value.c_str());
