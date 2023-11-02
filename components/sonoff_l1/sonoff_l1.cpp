@@ -117,6 +117,7 @@ void SonoffL1Output::loop() {
 
       if (state_has_changed && this->light_state_) {
           ESP_LOGV(TAG, "Publishing light state to frontend");
+          call.set_transition_length(0);
           call.perform();
         }
 
