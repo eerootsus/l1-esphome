@@ -22,11 +22,9 @@ void SonoffL1Output::write_state(light::LightState *state) {
 }
 
 void SonoffL1Output::send_next_state() {
-  std::string update_command = "AT+UPDATE=";
+  uint64_t sequence = micros();
+  std::string update_command = "AT+UPDATE="\"sequence\":\"" + std::to_string(sequence) + "\"";
 
-  this->last_sequence_ = micros();
-
-  update_command += "\"sequence\":\"" + std::to_string(this->last_sequence_) + "\"";
   ESP_LOGD(TAG, "Setting light state:");
 
   bool current_state = this->light_state_->current_values.is_on();
@@ -46,6 +44,7 @@ void SonoffL1Output::send_next_state() {
 
   this->light_state_ = this->next_light_state_;
   this->next_light_state_ = nullptr;
+  this->last_sequence_ = sequence;
 
   this->send_at_command(update_command.c_str());
 }
