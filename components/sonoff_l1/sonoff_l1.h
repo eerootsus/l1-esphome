@@ -9,6 +9,7 @@
 #include "esphome/components/light/light_state.h"
 #include "esphome/components/light/light_traits.h"
 #include "esphome/components/light/light_color_values.h"
+#include "esphome/components/light/light_call.h"
 
 namespace esphome {
 namespace sonoff_l1 {
@@ -23,12 +24,12 @@ class SonoffL1Output : public light::LightOutput, public uart::UARTDevice, publi
   // Component methods
   void setup() override {};
   void loop() override;
-  void dump_config() override;
   float get_setup_priority() const override { return esphome::setup_priority::BUS; }
 
  protected:
   std::vector<uint8_t> bytes_{};
   light::LightColorValues light_color_values_;
+  light::LightCall *call_{nullptr};
   light::LightState *next_light_state_{nullptr};
   uint64_t last_sequence_{0};
 

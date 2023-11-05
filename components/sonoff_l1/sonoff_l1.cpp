@@ -13,6 +13,8 @@ light::LightTraits SonoffL1Output::get_traits() {
 
 void SonoffL1Output::setup_state(light::LightState *state) {
   ESP_LOGD(TAG, "Setting up light initial state");
+  this->call_ = state->make_call();
+  this->call_.set_transition_length(0);
   this->light_color_values_.set_state(state->current_values.is_on());
 }
 
@@ -59,10 +61,6 @@ void SonoffL1Output::send_at_command(const char *str) {
   this->flush();
 }
 
-void SonoffL1Output::dump_config() {
-  ESP_LOGCONFIG(TAG, "L1 instance name: '%s'", this->light_state_ ? this->light_state_->get_name().c_str() : "");
-}
-
 void SonoffL1Output::loop() {
   int count = 32;
   while (this->available() && count--) {
@@ -77,7 +75,6 @@ void SonoffL1Output::loop() {
       std::string header = message.substr(0, message.find("="));
       message.erase(0, message.find("=") + 1);
       bool state_has_changed = false;
-      auto call = this->light_state_->make_call();
 
       if(header == "AT+RESULT"){
         ESP_LOGV(TAG, "Received AT+RESULT, sending ACK");
@@ -97,10 +94,10 @@ void SonoffL1Output::loop() {
 
           if(attribute == "\"switch\""){
             if (value == "\"on\"" && !this->light_color_values_.is_on()) {
-              call.set_state(true);
+              this->call_.set_state(true);
               state_has_changed = true;
             } else if (value == "\"off\"" && this->light_color_values_.is_on()) {
-              call.set_state(false);
+              this->call_.set_state(false);
               state_has_changed = true;
             }
           } else {
@@ -117,8 +114,7 @@ void SonoffL1Output::loop() {
 
       if (state_has_changed) {
           ESP_LOGV(TAG, "Publishing light state to frontend");
-          call.set_transition_length(0);
-          call.perform();
+          this->call_.perform();
         }
 
     } else {
