@@ -13,7 +13,7 @@ light::LightTraits SonoffL1Output::get_traits() {
 
 void SonoffL1Output::setup_state(light::LightState *state) {
   ESP_LOGD(TAG, "Setting up light initial state");
-  this->light_state_ = state;
+  this->light_state_ = set_state(state.is_on());
 }
 
 void SonoffL1Output::write_state(light::LightState *state) {
@@ -27,8 +27,9 @@ void SonoffL1Output::send_next_state() {
 
   ESP_LOGD(TAG, "Sending light state:");
 
-  bool current_state = this->light_state_->current_values.is_on();
-  bool next_state = this->next_light_state_->current_values.is_on();
+  bool current_state = this->light_state_.is_on();
+  bool next_state = this->next_light_state_.is_on();
+  ESP_LOGV(TAG, "  Current state %s, next state %s", ONOFF(current_state), ONOFF(next_state));
   if (next_state != current_state) {
     ESP_LOGD(TAG, "  Setting state: %s", ONOFF(next_state));
     update_command += ",\"switch\":\"";
@@ -45,7 +46,7 @@ void SonoffL1Output::send_next_state() {
   }*/
 
 
-  this->light_state_ = this->next_light_state_;
+  //this->light_state_ = this->next_light_state_;
   this->next_light_state_ = nullptr;
   this->last_sequence_ = sequence;
 
@@ -77,8 +78,7 @@ void SonoffL1Output::loop() {
       std::string header = message.substr(0, message.find("="));
       message.erase(0, message.find("=") + 1);
       bool state_has_changed = false;
-      ESP_LOGV(TAG, "Message header: %s", header.c_str());
-      auto call = light_state_->make_call();
+      auto call = this->light_state_->make_call();
 
       if(header == "AT+RESULT"){
         ESP_LOGV(TAG, "Received AT+RESULT, sending ACK");
@@ -86,7 +86,7 @@ void SonoffL1Output::loop() {
         // TODO: compare if the received sequence matches with our last sequence (maybe need to resend?)
       }
 
-      if(header == "AT+UPDATE"){
+      else if(header == "AT+UPDATE"){
         ESP_LOGV(TAG, "Received AT+UPDATE, parsing attributes");
         message.push_back(','); // Add a comma to the end of the message so we can parse the last attribute
         while(message.length()){
@@ -110,6 +110,9 @@ void SonoffL1Output::loop() {
 
           ESP_LOGV(TAG, "Attribute %s has value %s", attribute.c_str(), value.c_str());
         }
+      }
+      else {
+        ESP_LOGD(TAG, "Received message header: %s; no handling", header.c_str());
       }
 
 
