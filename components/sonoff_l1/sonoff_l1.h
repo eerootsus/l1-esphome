@@ -8,6 +8,7 @@
 #include "esphome/components/light/light_output.h"
 #include "esphome/components/light/light_state.h"
 #include "esphome/components/light/light_traits.h"
+#include "esphome/components/light/light_color_values.h"
 
 namespace esphome {
 namespace sonoff_l1 {
@@ -27,7 +28,7 @@ class SonoffL1Output : public light::LightOutput, public uart::UARTDevice, publi
 
  protected:
   std::vector<uint8_t> bytes_{};
-  light::LightState light_state_;
+  light::LightColorValues light_color_values_;
   light::LightState *next_light_state_{nullptr};
   uint64_t last_sequence_{0};
 

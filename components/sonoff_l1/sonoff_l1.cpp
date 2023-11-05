@@ -13,7 +13,7 @@ light::LightTraits SonoffL1Output::get_traits() {
 
 void SonoffL1Output::setup_state(light::LightState *state) {
   ESP_LOGD(TAG, "Setting up light initial state");
-  this->light_state_ = set_state(state.is_on());
+  this->light_color_values_.set_state(state->current_values.is_on());
 }
 
 void SonoffL1Output::write_state(light::LightState *state) {
@@ -27,8 +27,8 @@ void SonoffL1Output::send_next_state() {
 
   ESP_LOGD(TAG, "Sending light state:");
 
-  bool current_state = this->light_state_.is_on();
-  bool next_state = this->next_light_state_.is_on();
+  bool current_state = this->light_color_values_.is_on();
+  bool next_state = this->next_light_state_->current_values.is_on();
   ESP_LOGV(TAG, "  Current state %s, next state %s", ONOFF(current_state), ONOFF(next_state));
   if (next_state != current_state) {
     ESP_LOGD(TAG, "  Setting state: %s", ONOFF(next_state));
@@ -46,7 +46,6 @@ void SonoffL1Output::send_next_state() {
   }*/
 
 
-  //this->light_state_ = this->next_light_state_;
   this->next_light_state_ = nullptr;
   this->last_sequence_ = sequence;
 
@@ -97,10 +96,10 @@ void SonoffL1Output::loop() {
           value.erase(0, value.find(":") + 1);
 
           if(attribute == "\"switch\""){
-            if (value == "\"on\"" && !this->light_state_->current_values.is_on()) {
+            if (value == "\"on\"" && !this->light_color_values_.is_on()) {
               call.set_state(true);
               state_has_changed = true;
-            } else if (value == "\"off\"" && this->light_state_->current_values.is_on()) {
+            } else if (value == "\"off\"" && this->light_color_values_.is_on()) {
               call.set_state(false);
               state_has_changed = true;
             }
@@ -116,7 +115,7 @@ void SonoffL1Output::loop() {
       }
 
 
-      if (state_has_changed && this->light_state_) {
+      if (state_has_changed) {
           ESP_LOGV(TAG, "Publishing light state to frontend");
           call.set_transition_length(0);
           call.perform();
