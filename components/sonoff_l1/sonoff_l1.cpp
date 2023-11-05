@@ -31,7 +31,9 @@ void SonoffL1Output::send_next_state() {
   bool next_state = this->next_light_state_->current_values.is_on();
   if (next_state != current_state) {
     ESP_LOGD(TAG, "  Setting state: %s", ONOFF(next_state));
-    update_command += ",\"switch\":\"" + (next_state ? "on" : "off") + "\"";
+    update_command += ",\"switch\":\"";
+    update_command += ONOFF(next_state);
+    update_command += "\"";
   }
 
 
