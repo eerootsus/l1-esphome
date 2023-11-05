@@ -22,36 +22,31 @@ void SonoffL1Output::write_state(light::LightState *state) {
 }
 
 void SonoffL1Output::send_next_state() {
-  char buffer [192];
-  bool binary;
-  float brightness;
-
-  // Fill our variables with the device's current state
-  this->next_light_state_->current_values_as_binary(&binary);
-  this->next_light_state_->current_values_as_brightness(&brightness);
+  std::string update_command = "AT+UPDATE=";
 
   this->light_state_ = this->next_light_state_;
   this->next_light_state_ = nullptr;
   this->last_sequence_ = micros();
 
+  update_command += "\"sequence\":\"" + std::to_string(this->last_sequence_) + "\"";
+  ESP_LOGD(TAG, "Setting light state:");
+
+  bool current_state = this->parent_->remote_values.is_on();
+  if (this->light_state_.value_or(current_state) != current_state) {
+    ESP_LOGD(TAG, "  Setting state: %s", ONOFF(this->light_state_.is_on()));
+    update_command += ",\"switch\":\"" + (this->light_state_.is_on() ? "on" : "off") + "\"";
+  }
+
+
   // Convert ESPHome's brightness (0-1) to the device's internal brightness (0-100)
-  const uint8_t calculated_brightness = (uint8_t) roundf(brightness * 100);
+  /*const uint8_t calculated_brightness = (uint8_t) roundf(brightness * 100);
 
   if (calculated_brightness == 0) {
     binary = false;
-  }
+  }*/
 
-  ESP_LOGD(TAG, "Setting light state: %s, brightness %d", binary ? "on" : "off", calculated_brightness);
 
-  sprintf (
-    buffer,
-    "AT+UPDATE=\"sequence\":\"%lld\",\"switch\":\"%s\",\"light_type\":1,\"colorR\":255,\"colorG\":255,\"colorB\":255,\"bright\":%d,\"mode\":1,\"speed\":50,\"sensitive\":10",
-    this->last_sequence_,
-    binary ? "on" : "off",
-    calculated_brightness
-  );
-
-  this->send_at_command(buffer);
+  this->send_at_command(update_command.c_str());
 }
 
 void SonoffL1Output::send_at_command(const char *str) {
@@ -117,7 +112,6 @@ void SonoffL1Output::loop() {
 
       if (state_has_changed && this->light_state_) {
           ESP_LOGV(TAG, "Publishing light state to frontend");
-          this->grace = millis() + SONOFF_L1_GRACE;
           call.set_transition_length(0);
           call.perform();
         }
@@ -127,7 +121,7 @@ void SonoffL1Output::loop() {
     }
   }
 
-  if(this->next_light_state_ != nullptr && millis() > this->grace){
+  if(this->next_light_state_ != nullptr){
     this->send_next_state();
   }
 }

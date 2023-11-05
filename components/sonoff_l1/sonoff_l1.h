@@ -13,8 +13,6 @@ namespace esphome {
 namespace sonoff_l1 {
 class SonoffL1Output : public light::LightOutput, public uart::UARTDevice, public Component {
 
- #define SONOFF_L1_GRACE 5000
-
  public:
   // LightOutput methods
   light::LightTraits get_traits() override;
@@ -32,7 +30,6 @@ class SonoffL1Output : public light::LightOutput, public uart::UARTDevice, publi
   light::LightState *light_state_{nullptr};
   light::LightState *next_light_state_{nullptr};
   uint64_t last_sequence_{0};
-  uint32_t grace{0};
 
   std::string uart_bytes_to_string(std::vector<uint8_t> bytes);
   void send_at_command(const char *str);
