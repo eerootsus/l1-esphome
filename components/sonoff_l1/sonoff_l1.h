@@ -13,7 +13,7 @@ namespace esphome {
 namespace sonoff_l1 {
 class SonoffL1Output : public light::LightOutput, public uart::UARTDevice, public Component {
 
- #define SONOFF_L1_GRACE 250
+ #define SONOFF_L1_GRACE 5000
 
  public:
   // LightOutput methods
