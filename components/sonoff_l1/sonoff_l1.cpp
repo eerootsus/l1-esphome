@@ -117,6 +117,7 @@ void SonoffL1Output::loop() {
 
       if (state_has_changed && this->light_state_) {
           ESP_LOGV(TAG, "Publishing light state to frontend");
+          this->grace = millis() + SONOFF_L1_GRACE;
           call.set_transition_length(0);
           call.perform();
         }
@@ -126,7 +127,7 @@ void SonoffL1Output::loop() {
     }
   }
 
-  if(this->next_light_state_ != nullptr) {
+  if(this->next_light_state_ != nullptr && millis() > this->grace){
     this->send_next_state();
   }
 }
