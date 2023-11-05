@@ -29,7 +29,7 @@ class SonoffL1Output : public light::LightOutput, public uart::UARTDevice, publi
  protected:
   std::vector<uint8_t> bytes_{};
   light::LightColorValues light_color_values_;
-  light::LightCall call_{null};
+  light::LightCall call_;
   light::LightState *next_light_state_{nullptr};
   uint64_t last_sequence_{0};
 
