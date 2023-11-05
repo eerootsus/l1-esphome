@@ -24,17 +24,16 @@ void SonoffL1Output::write_state(light::LightState *state) {
 void SonoffL1Output::send_next_state() {
   std::string update_command = "AT+UPDATE=";
 
-  this->light_state_ = this->next_light_state_;
-  this->next_light_state_ = nullptr;
   this->last_sequence_ = micros();
 
   update_command += "\"sequence\":\"" + std::to_string(this->last_sequence_) + "\"";
   ESP_LOGD(TAG, "Setting light state:");
 
-  bool current_state = this->parent_->remote_values.is_on();
-  if (this->light_state_.value_or(current_state) != current_state) {
-    ESP_LOGD(TAG, "  Setting state: %s", ONOFF(this->light_state_.is_on()));
-    update_command += ",\"switch\":\"" + (this->light_state_.is_on() ? "on" : "off") + "\"";
+  bool current_state = this->light_state_->current_values.is_on();
+  bool next_state = this->next_light_state_.current_values.is_on();
+  if (next_state != current_state) {
+    ESP_LOGD(TAG, "  Setting state: %s", ONOFF(next_state));
+    update_command += ",\"switch\":\"" + (next_state ? "on" : "off") + "\"";
   }
 
 
@@ -45,6 +44,8 @@ void SonoffL1Output::send_next_state() {
     binary = false;
   }*/
 
+  this->light_state_ = this->next_light_state_;
+  this->next_light_state_ = nullptr;
 
   this->send_at_command(update_command.c_str());
 }
