@@ -23,12 +23,12 @@ void SonoffL1Output::write_state(light::LightState *state) {
 
 void SonoffL1Output::send_next_state() {
   uint64_t sequence = micros();
-  std::string update_command = "AT+UPDATE="\"sequence\":\"" + std::to_string(sequence) + "\"";
+  std::string update_command = "AT+UPDATE=\"sequence\":\"" + std::to_string(sequence) + "\"";
 
   ESP_LOGD(TAG, "Setting light state:");
 
   bool current_state = this->light_state_->current_values.is_on();
-  bool next_state = this->next_light_state_.current_values.is_on();
+  bool next_state = this->next_light_state_->current_values.is_on();
   if (next_state != current_state) {
     ESP_LOGD(TAG, "  Setting state: %s", ONOFF(next_state));
     update_command += ",\"switch\":\"" + (next_state ? "on" : "off") + "\"";
