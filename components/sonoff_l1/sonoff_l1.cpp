@@ -18,7 +18,7 @@ void SonoffL1Output::setup_state(light::LightState *state) {
 }
 
 void SonoffL1Output::write_state(light::LightState *state) {
-  ESP_LOGD(TAG, "Setting up next light state");
+  ESP_LOGV(TAG, "Received next light state");
   this->next_light_state_ = state;
 }
 
@@ -26,12 +26,12 @@ void SonoffL1Output::send_next_state() {
   uint64_t sequence = micros();
   std::string update_command = "AT+UPDATE=\"sequence\":\"" + std::to_string(sequence) + "\"";
 
-  ESP_LOGD(TAG, "Sending light state:");
+  ESP_LOGV(TAG, "Sending next light state");
 
   bool current_state = this->light_color_values_.is_on();
   bool next_state = this->next_light_state_->current_values.is_on();
   if (next_state != current_state) {
-    ESP_LOGD(TAG, "  Setting state: %s", ONOFF(next_state));
+    ESP_LOGD(TAG, "Setting state: %s", ONOFF(next_state));
     update_command += ",\"switch\":\"";
     update_command += (next_state ? "on" : "off");
     update_command += "\"";
@@ -108,12 +108,12 @@ void SonoffL1Output::loop() {
         }
       }
       else {
-        ESP_LOGD(TAG, "Received message header: %s; no handling", header.c_str());
+        ESP_LOGD(TAG, "Received message header: %s; no handling implemented", header.c_str());
       }
 
 
       if (values_have_changed) {
-        ESP_LOGV(TAG, "Publishing light state to frontend");
+        ESP_LOGD(TAG, "Light has changed, publishing light state to frontend");
         call_.perform();
       }
 
