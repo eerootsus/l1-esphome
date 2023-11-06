@@ -41,6 +41,7 @@ void SonoffL1Output::send_next_state() {
 
   bool current_brightness = this->light_color_values_.get_brightness();
   bool next_brightness = this->next_light_state_->current_values.get_brightness();
+  ESP_LOGD(TAG, "Current brightness %d, next brightness %d", current_brightness, next_brightness);
   if (next_brightness != current_brightness) {
     const uint8_t calculated_brightness = (uint8_t) roundf(next_brightness * 100);
     ESP_LOGD(TAG, "Setting brightness: %d", next_brightness);
