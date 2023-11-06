@@ -103,7 +103,7 @@ void SonoffL1Output::loop() {
               values_have_changed = true;
             }
           } else if(attribute == "\"bright\""){
-            float brightness = std::stof(value);
+            float brightness = std::stof(value)/100.0;
             if(this->light_color_values_.get_brightness() != brightness){
               call_.set_brightness(brightness);
               values_have_changed = true;
