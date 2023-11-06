@@ -74,7 +74,7 @@ void SonoffL1Output::loop() {
       std::string header = message.substr(0, message.find("="));
       message.erase(0, message.find("=") + 1);
       bool values_have_changed = false;
-      auto call_ = this->state->make_call();
+      auto call_ = this->light_state_->make_call();
       call_.set_transition_length(0);
 
       if(header == "AT+RESULT"){
