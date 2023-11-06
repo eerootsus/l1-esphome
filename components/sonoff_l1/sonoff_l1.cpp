@@ -15,6 +15,7 @@ void SonoffL1Output::setup_state(light::LightState *state) {
   ESP_LOGD(TAG, "Setting up light initial state");
   this->light_state_ = state;
   this->light_color_values_.set_state(state->current_values.is_on());
+  this->light_color_values_.set_brightness(state->current_values.get_brightness());
 }
 
 void SonoffL1Output::write_state(light::LightState *state) {
