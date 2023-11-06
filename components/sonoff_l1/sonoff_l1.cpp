@@ -30,7 +30,8 @@ void SonoffL1Output::send_next_state() {
   ESP_LOGV(TAG, "Sending next light state");
 
   bool current_state = this->light_color_values_.is_on();
-  bool next_state = this->next_light_state_->current_values.is_on();
+  bool next_state;
+  this->next_light_state_->current_values_as_binary(next_state);
   if (next_state != current_state) {
     ESP_LOGD(TAG, "Setting state: %s", ONOFF(next_state));
     update_command += ",\"switch\":\"";
@@ -40,8 +41,9 @@ void SonoffL1Output::send_next_state() {
   }
 
   bool current_brightness = this->light_color_values_.get_brightness();
-  bool next_brightness = this->next_light_state_->current_values.get_brightness();
-  ESP_LOGD(TAG, "Current brightness %d, next brightness %d", current_brightness, next_brightness);
+  bool next_brightness;
+  this->next_light_state_->current_values_as_brightness(&next_brightness);
+  ESP_LOGD(TAG, "Current brightness %.2f, next brightness %.2f", current_brightness, next_brightness);
   if (next_brightness != current_brightness) {
     const uint8_t calculated_brightness = (uint8_t) roundf(next_brightness * 100);
     ESP_LOGD(TAG, "Setting brightness: %d", next_brightness);
