@@ -30,11 +30,10 @@ void SonoffL1Output::send_next_state() {
 
   bool current_state = this->light_color_values_.is_on();
   bool next_state = this->next_light_state_->current_values.is_on();
-  ESP_LOGV(TAG, "  Current state %s, next state %s", ONOFF(current_state), ONOFF(next_state));
   if (next_state != current_state) {
     ESP_LOGD(TAG, "  Setting state: %s", ONOFF(next_state));
     update_command += ",\"switch\":\"";
-    update_command += ONOFF(next_state);
+    update_command += (next_state ? "on" : "off");
     update_command += "\"";
     this->light_color_values_.set_state(next_state);
   }
