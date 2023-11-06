@@ -38,13 +38,15 @@ void SonoffL1Output::send_next_state() {
     this->light_color_values_.set_state(next_state);
   }
 
-  // Convert ESPHome's brightness (0-1) to the device's internal brightness (0-100)
-  /*const uint8_t calculated_brightness = (uint8_t) roundf(brightness * 100);
-
-  if (calculated_brightness == 0) {
-    binary = false;
-  }*/
-
+  bool current_brightness = this->light_color_values_.get_brightness();
+  bool next_brightness = this->next_light_state_->current_values.get_brightness();
+  if (next_brightness != current_brightness) {
+    const uint8_t calculated_brightness = (uint8_t) roundf(next_brightness * 100);
+    ESP_LOGD(TAG, "Setting brightness: %d", next_brightness);
+    update_command += ",\"bright\":";
+    update_command += std::to_string(calculated_brightness);
+    this->light_color_values_.set_brightness(next_brightness);
+  }
 
   this->next_light_state_ = nullptr;
   this->last_sequence_ = sequence;
@@ -98,6 +100,12 @@ void SonoffL1Output::loop() {
               values_have_changed = true;
             } else if (value == "\"off\"" && this->light_color_values_.is_on()) {
               call_.set_state(false);
+              values_have_changed = true;
+            }
+          } else if(attribute == "\"bright\""){
+            float brightness = std::stof(value);
+            if(this->light_color_values_.get_brightness() != brightness){
+              call_.set_brightness(brightness);
               values_have_changed = true;
             }
           } else {
