@@ -13,8 +13,7 @@ light::LightTraits SonoffL1Output::get_traits() {
 
 void SonoffL1Output::setup_state(light::LightState *state) {
   ESP_LOGD(TAG, "Setting up light initial state");
-  this->call_ = state->make_call();
-  this->call_.set_transition_length(0);
+  this->light_state_ = state;
   this->light_color_values_.set_state(state->current_values.is_on());
 }
 
@@ -37,8 +36,8 @@ void SonoffL1Output::send_next_state() {
     update_command += ",\"switch\":\"";
     update_command += ONOFF(next_state);
     update_command += "\"";
+    this->light_color_values_.set_state(next_state);
   }
-
 
   // Convert ESPHome's brightness (0-1) to the device's internal brightness (0-100)
   /*const uint8_t calculated_brightness = (uint8_t) roundf(brightness * 100);
@@ -74,7 +73,9 @@ void SonoffL1Output::loop() {
 
       std::string header = message.substr(0, message.find("="));
       message.erase(0, message.find("=") + 1);
-      bool state_has_changed = false;
+      bool values_have_changed = false;
+      auto call_ = this->state->make_call();
+      call_.set_transition_length(0);
 
       if(header == "AT+RESULT"){
         ESP_LOGV(TAG, "Received AT+RESULT, sending ACK");
@@ -94,11 +95,11 @@ void SonoffL1Output::loop() {
 
           if(attribute == "\"switch\""){
             if (value == "\"on\"" && !this->light_color_values_.is_on()) {
-              this->call_.set_state(true);
-              state_has_changed = true;
+              call_.set_state(true);
+              values_have_changed = true;
             } else if (value == "\"off\"" && this->light_color_values_.is_on()) {
-              this->call_.set_state(false);
-              state_has_changed = true;
+              call_.set_state(false);
+              values_have_changed = true;
             }
           } else {
             continue;
@@ -112,10 +113,10 @@ void SonoffL1Output::loop() {
       }
 
 
-      if (state_has_changed) {
-          ESP_LOGV(TAG, "Publishing light state to frontend");
-          this->call_.perform();
-        }
+      if (values_have_changed) {
+        ESP_LOGV(TAG, "Publishing light state to frontend");
+        call_.perform();
+      }
 
     } else {
       this->bytes_.push_back(byte);
