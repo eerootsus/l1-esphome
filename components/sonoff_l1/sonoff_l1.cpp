@@ -4,10 +4,11 @@ namespace esphome {
 namespace sonoff_l1 {
 
 static const char *const TAG = "sonoff_l1";
+static const float COLOR_SCALE = 1.0f / 255.f;
 
 light::LightTraits SonoffL1Output::get_traits() {
   auto traits = light::LightTraits();
-  traits.set_supported_color_modes({light::ColorMode::BRIGHTNESS});
+  traits.set_supported_color_modes({light::ColorMode::RGB});
   return traits;
 }
 
@@ -29,8 +30,26 @@ void SonoffL1Output::send_next_state() {
 
   ESP_LOGV(TAG, "Sending next light state");
 
-  bool current_state = this->light_color_values_.is_on();
-  bool next_state = this->next_light_state_->current_values.is_on();
+  bool current_state;
+  bool next_state;
+  float current_brightness;
+  float next_brightness;
+  float current_red;
+  float next_red;
+  float current_green;
+  float next_green;
+  float current_blue;
+  float next_blue;
+
+  this->light_color_values_.as_binary(current_state);
+  this->next_light_state_->current_values.as_binary(next_state);
+
+  this->light_color_values_.as_brightness(current_brightness);
+  this->next_light_state_->current_values.as_brightness(next_brightness);
+
+  this->light_color_values_.as_rgb(current_red, current_green, current_blue);
+  this->next_light_state_->current_values.as_rgb(next_red, next_green, next_blue);
+
   if (next_state != current_state) {
     ESP_LOGD(TAG, "Setting state: %s", ONOFF(next_state));
     update_command += ",\"switch\":\"";
@@ -39,14 +58,36 @@ void SonoffL1Output::send_next_state() {
     this->light_color_values_.set_state(next_state);
   }
 
-  float current_brightness = this->light_color_values_.get_brightness();
-  float next_brightness = this->next_light_state_->current_values.get_brightness();
   if (next_brightness != current_brightness) {
     const uint8_t calculated_brightness = (uint8_t) roundf(next_brightness * 100);
     ESP_LOGD(TAG, "Setting brightness: %d", calculated_brightness);
     update_command += ",\"bright\":";
     update_command += std::to_string(calculated_brightness);
     this->light_color_values_.set_brightness(next_brightness);
+  }
+
+  if (next_red != current_red) {
+    const uint8_t calculated_red = light::to_uint8_scale(next_red);
+    ESP_LOGD(TAG, "Setting red: %d", calculated_red);
+    update_command += ",\"colorR\":";
+    update_command += std::to_string(calculated_red);
+    this->light_color_values_.set_red(next_red);
+  }
+
+  if (next_green != current_green) {
+    const uint8_t calculated_green = light::to_uint8_scale(next_green);
+    ESP_LOGD(TAG, "Setting green: %d", calculated_green);
+    update_command += ",\"colorG\":";
+    update_command += std::to_string(calculated_green);
+    this->light_color_values_.set_green(next_green);
+  }
+
+  if (next_blue != current_blue) {
+    const uint8_t calculated_blue = light::to_uint8_scale(next_blue);
+    ESP_LOGD(TAG, "Setting blue: %d", calculated_blue);
+    update_command += ",\"colorB\":";
+    update_command += std::to_string(calculated_blue);
+    this->light_color_values_.set_blue(next_blue);
   }
 
   this->next_light_state_ = nullptr;
@@ -107,6 +148,24 @@ void SonoffL1Output::loop() {
             float brightness = std::stof(value)/100.0;
             if(this->light_color_values_.get_brightness() != brightness){
               call_.set_brightness(brightness);
+              values_have_changed = true;
+            }
+          } else if(attribute == "\"colorR\"") {
+            float red = std::stof(value) * COLOR_SCALE;
+            if(this->light_color_values_.get_red() != red){
+              call_.set_red(red);
+              values_have_changed = true;
+            }
+          } else if(attribute == "\"colorG\"") {
+            float green = std::stof(value) * COLOR_SCALE;
+            if(this->light_color_values_.get_green() != green){
+              call_.set_green(green);
+              values_have_changed = true;
+            }
+          } else if(attribute == "\"colorB\"") {
+            float blue = std::stof(value) * COLOR_SCALE;
+            if(this->light_color_values_.get_blue() != blue){
+              call_.set_blue(blue);
               values_have_changed = true;
             }
           } else {
