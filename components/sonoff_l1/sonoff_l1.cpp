@@ -41,14 +41,14 @@ void SonoffL1Output::send_next_state() {
   float current_blue;
   float next_blue;
 
-  this->light_color_values_.as_binary(current_state);
-  this->next_light_state_->current_values.as_binary(next_state);
+  this->light_color_values_.as_binary(&current_state);
+  this->next_light_state_->current_values.as_binary(&next_state);
 
-  this->light_color_values_.as_brightness(current_brightness);
-  this->next_light_state_->current_values.as_brightness(next_brightness);
+  this->light_color_values_.as_brightness(&current_brightness);
+  this->next_light_state_->current_values.as_brightness(&next_brightness);
 
-  this->light_color_values_.as_rgb(current_red, current_green, current_blue);
-  this->next_light_state_->current_values.as_rgb(next_red, next_green, next_blue);
+  this->light_color_values_.as_rgb(&current_red, &current_green, &current_blue);
+  this->next_light_state_->current_values.as_rgb(&next_red, &next_green, &next_blue);
 
   if (next_state != current_state) {
     ESP_LOGD(TAG, "Setting state: %s", ONOFF(next_state));
