@@ -53,6 +53,9 @@ void SonoffL1Output::send_next_state() {
   this->light_color_values_.as_rgb(&current_red, &current_green, &current_blue);
   this->next_light_state_->current_values.as_rgb(&next_red, &next_green, &next_blue);
 
+  ESP_LOGV(TAG, "Current state: %s, %f, R%f, G%f, B%f", ONOFF(current_on), current_brightness, current_red, current_green, current_blue);
+  ESP_LOGV(TAG, "Next state: %s, %f, R%f, G%f, B%f", ONOFF(next_on), next_brightness, next_red, next_green, next_blue);
+
   if (next_on != current_on) {
     ESP_LOGD(TAG, "Setting state: %s", ONOFF(next_on));
     update_command += ",\"switch\":\"";
