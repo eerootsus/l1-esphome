@@ -30,19 +30,22 @@ void SonoffL1Output::send_next_state() {
 
   ESP_LOGV(TAG, "Sending next light state");
 
-  bool current_state;
-  bool next_state;
+  // Current known states of the light parameters
+  bool current_on;
   float current_brightness;
-  float next_brightness;
   float current_red;
-  float next_red;
   float current_green;
-  float next_green;
   float current_blue;
+
+  // Next states of the light parameters received from the frontend
+  bool next_on;
+  float next_brightness;
+  float next_red;
+  float next_green;
   float next_blue;
 
-  this->light_color_values_.as_binary(&current_state);
-  this->next_light_state_->current_values.as_binary(&next_state);
+  this->light_color_values_.as_binary(&current_on);
+  this->next_light_state_->current_values.as_binary(&next_on);
 
   this->light_color_values_.as_brightness(&current_brightness);
   this->next_light_state_->current_values.as_brightness(&next_brightness);
@@ -50,15 +53,15 @@ void SonoffL1Output::send_next_state() {
   this->light_color_values_.as_rgb(&current_red, &current_green, &current_blue);
   this->next_light_state_->current_values.as_rgb(&next_red, &next_green, &next_blue);
 
-  if (next_state != current_state) {
-    ESP_LOGD(TAG, "Setting state: %s", ONOFF(next_state));
+  if (next_on != current_on) {
+    ESP_LOGD(TAG, "Setting state: %s", ONOFF(next_on));
     update_command += ",\"switch\":\"";
-    update_command += (next_state ? "on" : "off");
+    update_command += (next_on ? "on" : "off");
     update_command += "\"";
-    this->light_color_values_.set_state(next_state);
+    this->light_color_values_.set_state(next_on);
   }
 
-  if (next_brightness != current_brightness) {
+  if (next_on && next_brightness != current_brightness) {
     const uint8_t calculated_brightness = (uint8_t) roundf(next_brightness * 100);
     ESP_LOGD(TAG, "Setting brightness: %d", calculated_brightness);
     update_command += ",\"bright\":";
@@ -66,7 +69,7 @@ void SonoffL1Output::send_next_state() {
     this->light_color_values_.set_brightness(next_brightness);
   }
 
-  if (next_red != current_red) {
+  if (next_on && next_red != current_red) {
     const uint8_t calculated_red = light::to_uint8_scale(next_red);
     ESP_LOGD(TAG, "Setting red: %d", calculated_red);
     update_command += ",\"colorR\":";
@@ -74,7 +77,7 @@ void SonoffL1Output::send_next_state() {
     this->light_color_values_.set_red(next_red);
   }
 
-  if (next_green != current_green) {
+  if (next_on && next_green != current_green) {
     const uint8_t calculated_green = light::to_uint8_scale(next_green);
     ESP_LOGD(TAG, "Setting green: %d", calculated_green);
     update_command += ",\"colorG\":";
@@ -82,7 +85,7 @@ void SonoffL1Output::send_next_state() {
     this->light_color_values_.set_green(next_green);
   }
 
-  if (next_blue != current_blue) {
+  if (next_on && next_blue != current_blue) {
     const uint8_t calculated_blue = light::to_uint8_scale(next_blue);
     ESP_LOGD(TAG, "Setting blue: %d", calculated_blue);
     update_command += ",\"colorB\":";
